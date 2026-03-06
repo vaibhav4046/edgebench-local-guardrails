@@ -1,0 +1,18 @@
+dataset_path: data/synthetic_prompts_3250.jsonl
+results_root: results
+repeats: 3
+request_timeout_seconds: 120
+job_timeout_seconds: 0
+stream: true
+max_attempts: 2
+raw_output_max_bytes: 8192
+sampling:
+  temperature: 0.2
+  top_p: 0.9
+  top_k: 40
+  seed: 42
+  num_predict: 256
+deterministic_mode: false
+temperature_sweep:
+  enabled: false
+  values: [0.0, 0.2, 0.5, 0.8]

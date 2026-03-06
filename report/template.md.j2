@@ -1,0 +1,62 @@
+﻿# EdgeBench Technical Report
+
+_Run ID: `{{ summary.run_id }}`_  
+_Dataset: `{{ summary.dataset_path }}`_  
+_Started: `{{ summary.started_at_utc }}`_  
+_Finished: `{{ summary.finished_at_utc }}`_  
+_Total records: `{{ summary.total_records }}`_
+
+## System Design Overview
+- Offline-first local execution against Ollama (`localhost:11434`)
+- Strict Pydantic structured-output guardrails with one retry max
+- Append-only per-record artifacts (`results.jsonl`) plus computed summary (`summary.json`)
+
+## Measurement Methodology
+- **TTFT**: wall-clock from request start to first streamed token chunk
+- **Total Latency**: wall-clock request start to stream completion
+- **Tokens/sec**: `eval_count / eval_duration * 1e9` (duration in nanoseconds)
+- Additional Ollama durations: prompt eval, load, total durations
+
+## Core Quality Metrics
+- Schema pass rate: `{{ "%.4f"|format(summary.schema_pass_rate) }}`
+- Retry rate: `{{ "%.4f"|format(summary.retry_rate) }}`
+- Failure rate: `{{ "%.4f"|format(summary.failure_rate) }}`
+
+## Model / Quantization Summary
+| Model/Tag Group | TTFT mean | TTFT p50 | TTFT p95 | Latency mean | Latency p50 | Latency p95 | TPS mean | TPS p50 | TPS p95 | Schema Pass | Retry | Failure |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+{% for row in model_rows %}
+| `{{ row.group }}` | {{ "%.4f"|format(row.ttft_seconds_mean|default(0)) }} | {{ "%.4f"|format(row.ttft_seconds_p50|default(0)) }} | {{ "%.4f"|format(row.ttft_seconds_p95|default(0)) }} | {{ "%.4f"|format(row.total_response_latency_seconds_mean|default(0)) }} | {{ "%.4f"|format(row.total_response_latency_seconds_p50|default(0)) }} | {{ "%.4f"|format(row.total_response_latency_seconds_p95|default(0)) }} | {{ "%.2f"|format(row.tokens_per_second_mean|default(0)) }} | {{ "%.2f"|format(row.tokens_per_second_p50|default(0)) }} | {{ "%.2f"|format(row.tokens_per_second_p95|default(0)) }} | {{ "%.2f%%"|format((row.schema_pass_rate|default(0))*100) }} | {{ "%.2f%%"|format((row.retry_rate|default(0))*100) }} | {{ "%.2f%%"|format((row.failure_rate|default(0))*100) }} |
+{% endfor %}
+
+## Temperature Sweep Comparison
+| Model/Tag/Temp | TTFT mean | TTFT p95 | Latency mean | Latency p95 | TPS mean | TPS p95 | Schema Pass | Retry | Failure | Determinism |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+{% for row in model_temp_rows %}
+| `{{ row.group }}` | {{ "%.4f"|format(row.ttft_seconds_mean|default(0)) }} | {{ "%.4f"|format(row.ttft_seconds_p95|default(0)) }} | {{ "%.4f"|format(row.total_response_latency_seconds_mean|default(0)) }} | {{ "%.4f"|format(row.total_response_latency_seconds_p95|default(0)) }} | {{ "%.2f"|format(row.tokens_per_second_mean|default(0)) }} | {{ "%.2f"|format(row.tokens_per_second_p95|default(0)) }} | {{ "%.2f%%"|format((row.schema_pass_rate|default(0))*100) }} | {{ "%.2f%%"|format((row.retry_rate|default(0))*100) }} | {{ "%.2f%%"|format((row.failure_rate|default(0))*100) }} | {{ "%.2f%%"|format((row.determinism_exact_match_rate|default(0))*100) }} |
+{% endfor %}
+
+## Failure + Retry Breakdown
+```json
+{{ summary.error_type_counts | tojson(indent=2) }}
+```
+
+## Determinism
+```json
+{{ determinism | tojson(indent=2) }}
+```
+
+## Memory Usage
+```json
+{{ memory | tojson(indent=2) }}
+```
+
+## GPU Usage (Best Effort)
+```json
+{{ gpu | tojson(indent=2) }}
+```
+
+## Key Findings and Trade-Offs
+1. This report contains measured local values only, sourced from run artifacts.
+2. Deterministic mode and low temperature usually improve exact-match stability at the cost of diversity.
+3. Quantized tags can reduce latency and memory footprint, with possible schema fidelity trade-offs depending on model tag quality.

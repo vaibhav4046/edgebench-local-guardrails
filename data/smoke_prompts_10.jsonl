@@ -1,0 +1,10 @@
+{"id":"smoke-001","prompt":"Summarize why hydration matters in one sentence.","category":"summarization"}
+{"id":"smoke-002","prompt":"Classify sentiment of: 'I love this design'.","category":"classification"}
+{"id":"smoke-003","prompt":"Extract two key points from: Local-first systems improve privacy and resilience.","category":"extraction"}
+{"id":"smoke-004","prompt":"Give a concise answer: What is TTFT?","category":"qa"}
+{"id":"smoke-005","prompt":"Provide one reason to use deterministic decoding.","category":"reasoning"}
+{"id":"smoke-006","prompt":"Name one risk of malformed JSON outputs.","category":"qa"}
+{"id":"smoke-007","prompt":"Summarize in one sentence: strict schemas reduce parsing failures.","category":"summarization"}
+{"id":"smoke-008","prompt":"Classify as positive/negative: 'The benchmark is slow but stable.'","category":"classification"}
+{"id":"smoke-009","prompt":"Extract one action item: Install Ollama and pull model tags.","category":"extraction"}
+{"id":"smoke-010","prompt":"Explain tokens/sec in simple terms.","category":"qa"}

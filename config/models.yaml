@@ -1,0 +1,17 @@
+﻿# Logical model groups mapped to configurable Ollama tags.
+# Tags here are examples only. Update to tags you have pulled locally.
+models:
+  - model_key: llama3.2-mini
+    tag: llama3.2:1b-instruct-q4_K_M
+    base_url: http://127.0.0.1:11434
+    enabled: true
+
+  - model_key: 54Mini
+    tag: 54Mini:latest
+    base_url: http://127.0.0.1:11434
+    enabled: true
+
+  - model_key: mistral-7b
+    tag: mistral:7b-instruct
+    base_url: http://127.0.0.1:11434
+    enabled: true

@@ -1,0 +1,17 @@
+﻿:root {
+  --bg: #f2efe7;
+  --bg-alt: #fff8e8;
+  --ink: #1a1d29;
+  --ink-soft: #4b5369;
+  --accent: #0f7a6c;
+  --accent-2: #e8562a;
+  --danger: #a10f2b;
+  --panel: #fffdf7;
+  --border: #d6cfbf;
+  --chart-1: #0f7a6c;
+  --chart-2: #e8562a;
+  --chart-3: #a10f2b;
+  --chart-4: #4263eb;
+  --chart-5: #2f9e44;
+  --chart-6: #d9480f;
+}
