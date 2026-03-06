@@ -47,7 +47,7 @@ If a tag is missing, choose another available local tag.
 ## Windows Setup
 
 ```powershell
-cd C:\Users\lalwa\Downloads\clinicmate
+cd C:\Users\lalwa\Downloads\edgebench-local-guardrails
 .\scripts\setup_windows.ps1
 ```
 
