@@ -120,6 +120,20 @@ Use the PowerShell wrapper:
 
 You can pass any extra `edgebench.cli` arguments after the command.
 
+## CLI Screenshots
+
+Doctor output:
+
+![CLI Doctor](docs/screenshots/cli_doctor.png)
+
+Benchmark output:
+
+![CLI Benchmark](docs/screenshots/cli_benchmark.png)
+
+Report generation output:
+
+![CLI Report](docs/screenshots/cli_report.png)
+
 ## Result Artifacts
 Per run:
 - `results/<run_id>/results.jsonl`
