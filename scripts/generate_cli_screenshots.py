@@ -9,7 +9,6 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 SCREEN_DIR = ROOT / "docs" / "screenshots"
-RUN_ID = "fixed_cli_20260306_091028"
 
 
 def _font() -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -95,14 +94,33 @@ def _doctor_lines() -> list[str]:
     ]
 
 
+def _latest_run_id() -> str:
+    latest = ROOT / "results" / "latest" / "summary.json"
+    if latest.exists():
+        payload = json.loads(latest.read_text(encoding="utf-8"))
+        run_id = payload.get("run_id")
+        if isinstance(run_id, str) and run_id:
+            return run_id
+
+    candidates = sorted((ROOT / "results").glob("*/summary.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    if not candidates:
+        raise FileNotFoundError("No results summary.json files found")
+    payload = json.loads(candidates[0].read_text(encoding="utf-8"))
+    run_id = payload.get("run_id")
+    if not isinstance(run_id, str) or not run_id:
+        raise ValueError("Latest summary.json is missing run_id")
+    return run_id
+
+
 def _benchmark_lines() -> list[str]:
-    summary_path = ROOT / "results" / RUN_ID / "summary.json"
-    records_path = ROOT / "results" / RUN_ID / "results.jsonl"
+    run_id = _latest_run_id()
+    summary_path = ROOT / "results" / run_id / "summary.json"
+    records_path = ROOT / "results" / run_id / "results.jsonl"
 
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     first_record = json.loads(records_path.read_text(encoding="utf-8").splitlines()[0])
     return [
-        rf"PS C:\Users\lalwa\Downloads\edgebench-local-guardrails> python -m edgebench.cli benchmark --run-id {RUN_ID}",
+        rf"PS C:\Users\lalwa\Downloads\edgebench-local-guardrails> python -m edgebench.cli benchmark --run-id {run_id}",
         f"run_id: {summary['run_id']}",
         f"total_records: {summary['total_records']}",
         f"success_count: {summary['success_count']}",
