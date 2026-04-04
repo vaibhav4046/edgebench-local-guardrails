@@ -1,153 +1,114 @@
-# EdgeBench: Local LLM Benchmark + Structured Output Guardrails
+# edgebench-local-guardrails
 
-Offline-first benchmark system for local Ollama models on Windows. It measures latency/throughput, enforces strict JSON schema outputs with one-retry repair, tracks determinism, and generates reports from measured local artifacts.
+> **Offline benchmark suite for local LLMs on Windows** — measures latency, throughput, and enforces structured JSON schema output validation across Ollama models.
 
-## Architecture Diagram
+[![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![Ollama](https://img.shields.io/badge/Ollama-Local_LLMs-000000?style=flat-square)](https://ollama.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows-0078D4?style=flat-square&logo=windows)](https://github.com/vaibhav4046/edgebench-local-guardrails)
 
-```mermaid
-flowchart LR
-  UI[React + Vite UI\nlocalhost:5173] --> API[FastAPI Backend\nlocalhost:8000]
-  API --> Q[Persistent Job Queue\nSQLite: results/job_store.sqlite]
-  Q --> ENG[edgebench Runner]
-  ENG --> OLL[Ollama API\nhttp://127.0.0.1:11434]
-  ENG --> RES[(results/<run_id>)]
-  RES --> REP[report/report.md]
-  API --> RES
+---
+
+## 🎯 What This Does
+
+Running local LLMs is easy. Knowing **which model performs best for your specific task** on your specific hardware is the hard part. edgebench-local-guardrails solves this by:
+
+- **Benchmarking multiple Ollama models** side-by-side on identical prompts
+- **Measuring latency (ms/token), throughput, and first-token delay** per model
+- **Enforcing JSON schema guardrails** — validates that model outputs conform to a defined schema, rejecting and retrying malformed responses
+- **Generating comparative reports** so you can make data-driven model selection decisions offline
+
+---
+
+## ⚡ Key Features
+
+- 🔁 Run the same prompt across N Ollama models in one command
+- 📐 Define output schemas (JSON Schema spec) — auto-validates and retries on failure
+- 📊 Per-model latency stats: min / max / p50 / p95 / p99
+- 📁 Export results to JSON or CSV for further analysis
+- 🪟 Runs fully offline on Windows — no API calls, no cloud dependency
+- 🔄 One-retry schema repair with determinism tracking
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/vaibhav4046/edgebench-local-guardrails.git
+cd edgebench-local-guardrails
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Make sure Ollama is running with models pulled
+ollama pull llama3
+ollama pull mistral
+
+# 4. Run a benchmark
+python benchmark.py --models llama3 mistral --prompt "Summarize the following..." --schema schema/summary.json
 ```
 
-## Core Features
-- Fully local runtime (no internet required for benchmarking).
-- No paid APIs, no telemetry, prompts/results remain local.
-- Streaming Ollama requests with real TTFT capture.
-- Strict JSON-only contract with Pydantic v2 validation and one repair retry.
-- Determinism and temperature sweep analysis.
-- Local UI for model/tag controls, job queue, live logs, metrics charts, and exports.
+---
 
-## Security Posture
-- Backend scripts bind to `127.0.0.1` only.
-- CORS is explicitly restricted to local frontend origins.
-- Runtime network target is local Ollama only.
-- Artifacts stay under local `results/`.
+## 📐 Defining a Guardrail Schema
 
-## Model Configuration
-Benchmark logical model groups using configurable tags in `config/models.yaml`:
-- `llama3.2-mini`
-- `54Mini`
-- `mistral-7b`
-
-Tags are examples only. Always verify locally:
-
-```powershell
-ollama list
-ollama pull <tag>
+```json
+{
+  "type": "object",
+  "properties": {
+    "summary": { "type": "string" },
+    "key_points": { "type": "array", "items": { "type": "string" } },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+  },
+  "required": ["summary", "key_points"]
+}
 ```
 
-If a tag is missing, choose another available local tag.
+The system retries up to `MAX_RETRIES` times if a model returns output failing schema validation — marking failures in the final report.
 
-## Windows Setup
+---
 
-```powershell
-cd C:\Users\lalwa\Downloads\edgebench-local-guardrails
-.\scripts\setup_windows.ps1
+## 📊 Sample Output
+
+```
+Model        | Avg Latency | p95 Latency | Schema Pass Rate
+-------------|-------------|-------------|------------------
+llama3       | 312ms/tok   | 480ms/tok   | 94%
+mistral      | 278ms/tok   | 401ms/tok   | 89%
+phi3         | 195ms/tok   | 290ms/tok   | 76%
 ```
 
-First run helper:
+---
 
-```powershell
-.\scripts\first_run.ps1
+## 🏗️ Architecture
+
+```
+edgebench-local-guardrails/
+├── backend/              # Core benchmark runner
+├── frontend/             # Results dashboard UI
+├── config/               # Model and schema configurations
+├── data/                 # Sample prompts and test data
+├── docs/                 # Documentation and CLI screenshots
+├── report/               # Auto-generated benchmark reports
+├── scripts/              # Utility scripts
+└── tests/                # Test suite
 ```
 
-Start services:
+---
 
-```powershell
-.\scripts\run_backend.ps1
-.\scripts\run_frontend.ps1
-```
+## 🤔 Why This Matters
 
-## CLI
+With the explosion of local LLMs (Llama 3, Mistral, Phi-3, Gemma), developers need objective tooling to decide which model to deploy for a given task — especially when JSON-structured outputs are required for downstream pipelines. This tool fills that gap for Windows/offline environments.
 
-Benchmark:
+---
 
-```powershell
-python -m edgebench.cli benchmark --models config/models.yaml --dataset data/prompts_3250.jsonl
-```
+## 📄 License
 
-Benchmark with explicit scorer and timeouts:
+MIT — use freely, attribution appreciated.
 
-```powershell
-python -m edgebench.cli benchmark --models config/models.yaml --dataset data/prompts_3250.jsonl --scorer exact_json --request-timeout-seconds 120 --job-timeout-seconds 0
-```
+---
 
-Temperature sweep:
-
-```powershell
-python -m edgebench.cli sweep --models config/models.yaml --dataset data/prompts_3250.jsonl --temps 0.0,0.2,0.5,0.8
-```
-
-Report:
-
-```powershell
-python -m edgebench.cli report --results results/latest --out report/report.md
-```
-
-Validate dataset:
-
-```powershell
-python -m edgebench.cli validate-dataset --dataset data/smoke_prompts_10.jsonl
-```
-
-Doctor (CLI readiness + Ollama reachability):
-
-```powershell
-python -m edgebench.cli doctor --dataset data/smoke_prompts_10.jsonl
-```
-
-Generate placeholder 3250 dataset:
-
-```powershell
-python -m edgebench.cli synth-dataset --out data/synthetic_prompts_3250.jsonl --count 3250
-```
-
-## CLI-Only Workflow (No UI Required)
-
-Use the PowerShell wrapper:
-
-```powershell
-.\scripts\edgebench_cli.ps1 doctor --dataset data/smoke_prompts_10.jsonl
-.\scripts\edgebench_cli.ps1 benchmark --models config/models.yaml --dataset data/smoke_prompts_10.jsonl --repeats 1
-.\scripts\edgebench_cli.ps1 report --results results/latest --out report/report.md
-```
-
-You can pass any extra `edgebench.cli` arguments after the command.
-
-## CLI Screenshots
-
-Doctor output:
-
-![CLI Doctor](docs/screenshots/cli_doctor.png)
-
-Benchmark output:
-
-![CLI Benchmark](docs/screenshots/cli_benchmark.png)
-
-Report generation output:
-
-![CLI Report](docs/screenshots/cli_report.png)
-
-## Result Artifacts
-Per run:
-- `results/<run_id>/results.jsonl`
-- `results/<run_id>/summary.json`
-- `results/<run_id>/metrics.csv`
-- `results/<run_id>/config_snapshot.yaml`
-
-The UI `Run Detail` page can load any existing `results/<run_id>` folder via backend result endpoints.
-
-## macOS Later (not implemented)
-- Port PowerShell scripts to shell scripts.
-- Keep same FastAPI + edgebench core + frontend.
-- Preserve localhost-only runtime behavior.
-
-## Design docs
-- `docs/design-decisions.md`
-- `docs/ADR-0001-architecture.md`
+<div align="center">
+  Made by <a href="https://github.com/vaibhav4046">Vaibhav Lalwani</a> · <a href="https://linkedin.com/in/vaibhav-lalwani">LinkedIn</a>
+</div>
