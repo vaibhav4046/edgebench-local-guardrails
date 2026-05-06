@@ -1,5 +1,9 @@
 # edgebench-local-guardrails
 
+<p align="center">
+  <a href="#"><img src="docs/screenshots/hero.png" alt="Offline benchmark suite for local Ollama LLMs" width="100%" /></a>
+</p>
+
 > **Offline benchmark suite for local LLMs on Windows** — measures latency, throughput, and enforces structured JSON schema output validation across Ollama models.
 
 [![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
