@@ -13,7 +13,7 @@
 
 ---
 
-## 🎯 What This Does
+## What This Does
 
 Running local LLMs is easy. Knowing **which model performs best for your specific task** on your specific hardware is the hard part. edgebench-local-guardrails solves this by:
 
@@ -24,18 +24,18 @@ Running local LLMs is easy. Knowing **which model performs best for your specifi
 
 ---
 
-## ⚡ Key Features
+## Key Features
 
-- 🔁 Run the same prompt across N Ollama models in one command
-- 📐 Define output schemas (JSON Schema spec) — auto-validates and retries on failure
-- 📊 Per-model latency stats: min / max / p50 / p95 / p99
-- 📁 Export results to JSON or CSV for further analysis
-- 🪟 Runs fully offline on Windows — no API calls, no cloud dependency
-- 🔄 One-retry schema repair with determinism tracking
+- Run the same prompt across N Ollama models in one command
+- Define output schemas (JSON Schema spec) — auto-validates and retries on failure
+- Per-model latency stats: min / max / p50 / p95 / p99
+- Export results to JSON or CSV for further analysis
+- Runs fully offline on Windows — no API calls, no cloud dependency
+- One-retry schema repair with determinism tracking
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # 1. Clone the repo
@@ -55,7 +55,7 @@ python benchmark.py --models llama3 mistral --prompt "Summarize the following...
 
 ---
 
-## 📐 Defining a Guardrail Schema
+## Defining a Guardrail Schema
 
 ```json
 {
@@ -73,7 +73,7 @@ The system retries up to `MAX_RETRIES` times if a model returns output failing s
 
 ---
 
-## 📊 Sample Output
+## Sample Output
 
 ```
 Model        | Avg Latency | p95 Latency | Schema Pass Rate
@@ -85,7 +85,7 @@ phi3         | 195ms/tok   | 290ms/tok   | 76%
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 edgebench-local-guardrails/
@@ -101,13 +101,13 @@ edgebench-local-guardrails/
 
 ---
 
-## 🤔 Why This Matters
+## Why This Matters
 
 With the explosion of local LLMs (Llama 3, Mistral, Phi-3, Gemma), developers need objective tooling to decide which model to deploy for a given task — especially when JSON-structured outputs are required for downstream pipelines. This tool fills that gap for Windows/offline environments.
 
 ---
 
-## 📄 License
+## License
 
 MIT — use freely, attribution appreciated.
 
